@@ -1,0 +1,158 @@
+syntax enable
+
+" setup vim-plug first
+ "curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+ "    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+ "leader
+ let mapleader = ','
+ let g:mapleader = ','
+
+ call plug#begin()
+ "  Plug 'Shougo/deoplete.nvim'
+ "  Plug 'roxma/nvim-yarp'
+ "  Plug 'roxma/vim-hug-neovim-rpc'
+
+ "view
+ Plug 'tomasr/molokai'
+
+ "nav
+ Plug 'scrooloose/nerdtree'
+ Plug 'bling/vim-bufferline'
+ Plug 'majutsushi/tagbar'
+
+
+ "commenter
+ Plug 'scrooloose/nerdcommenter'
+
+ "easymotion
+ Plug 'Lokaltog/vim-easymotion'
+
+ "tmux
+ Plug 'edkolev/tmuxline.vim'
+
+
+ "clangd
+ Plug 'prabirshrestha/vim-lsp'
+ Plug 'prabirshrestha/asyncomplete.vim'
+ Plug 'mattn/vim-lsp-settings'
+ Plug 'prabirshrestha/asyncomplete-lsp.vim'
+
+
+ call plug#end()
+
+
+ "molokai
+ let g:molokai_original = 1
+ let g:rehash256 = 1
+
+ "nerdtree
+ nmap <leader>n :NERDTreeToggle<CR>
+
+ "tagbar
+ nmap <leader>t :Tagbar<CR>
+
+ " ensure ftdetect et al work by including this after the bundle
+ filetype plugin indent on
+
+ set background=dark
+ set t_Co=256
+
+
+
+ filetype on
+ filetype indent on
+ filetype plugin on
+ filetype plugin indent on
+
+ set autoread
+ set wildignore=*.swp,*.bak,*.pyc,*.class,.svn
+ "set cursorcolumn
+ set cursorline
+
+ set scrolloff=7
+ set number
+ set nowrap
+ set showmatch
+ set matchtime=2
+
+ set hlsearch
+ set incsearch
+ set ignorecase
+ set smartcase
+
+ set smartindent
+ set autoindent
+
+ set tabstop=4
+ set shiftwidth=4
+ set softtabstop=4
+ set smarttab
+ set expandtab
+ set shiftround
+
+ map <C-j> <C-W>j
+ map <C-k> <C-W>k
+ map <C-h> <C-W>h
+ map <C-l> <C-W>l
+
+ "remove highlignt
+ noremap <silent><leader>/ :nohls<CR>
+
+ "tab
+ map <leader>tn :tabnext<cr>
+ map <leader>tp :tabprev<cr>
+ nnoremap <C-t>     :tabnew<CR>
+ inoremap <C-t>     <Esc>:tabnew<CR>
+
+ "buffer
+ map <leader>bn :bn<cr>
+ map <leader>bp :bp<cr>
+
+ "copy to clip
+ vnoremap <leader>y "+y
+ nmap <Leader>p "+p
+
+ "quickfix
+ nmap <Leader>qo :copen<CR>
+ nmap <Leader>qc :cclose<CR>
+
+
+if executable('pylsp')
+    " pip install python-lsp-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pylsp',
+        \ 'cmd': {server_info->['pylsp']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
+
+function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    setlocal signcolumn=yes
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+    nmap <buffer> gd <plug>(lsp-definition)
+    nmap <buffer> gs <plug>(lsp-document-symbol-search)
+    nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
+    nmap <buffer> gr <plug>(lsp-references)
+    nmap <buffer> gi <plug>(lsp-implementation)
+    nmap <buffer> gt <plug>(lsp-type-definition)
+    nmap <buffer> <leader>rn <plug>(lsp-rename)
+    nmap <buffer> [g <plug>(lsp-previous-diagnostic)
+    nmap <buffer> ]g <plug>(lsp-next-diagnostic)
+    nmap <buffer> K <plug>(lsp-hover)
+    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
+
+    let g:lsp_format_sync_timeout = 1000
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
+
+    " refer to doc to add more commands
+endfunction
+
+augroup lsp_install
+    au!
+    " call s:on_lsp_buffer_enabled only for languages that has the server registered.
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
+let g:lsp_diagnostics_enabled = 0         " disable diagnostics support
